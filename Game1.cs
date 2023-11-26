@@ -1,4 +1,7 @@
-﻿using Microsoft.Xna.Framework;
+﻿using Match3.Core;
+using Match3.Core.Utils;
+using Match3.Core.Utils.Input;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System;
@@ -9,16 +12,18 @@ namespace Match3
     {
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
-        private TestObject _testObject;
+        private Window _window;
+        private KeyListener _keyListener;
+        private MouseListener _mouseListener;
+        private GameController _gameController;
 
-        public Texture2D DefaultTexture { get; private set; }
+        private int _counter = 0;
 
         public event Action Updated;
-        public event Action<SpriteBatch> Drawed;
+        public event Action Drawed;
 
         public Game1()
         {
-            Window.AllowUserResizing = true;
             _graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
@@ -26,74 +31,37 @@ namespace Match3
 
         protected override void Initialize()
         {
-            // TODO: Add your initialization logic here
-            DefaultTexture = Content.Load<Texture2D>("heart");
-            _testObject = new TestObject(this);
+            Window.AllowUserResizing = true;
+            _window = new Window(Window);
+            _keyListener = new KeyListener(this);
+            _mouseListener = new MouseListener(this);
 
-            base.Initialize();
-        }
-
-        protected override void LoadContent()
-        {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
+            _gameController = new GameController(this, _spriteBatch);
+            //_gameController.AddObject(new TestObject(_gameController));
+            int maxCount = 10;
+            for(int i = 0; i < 10; i++)
+            {
+                TestObject TestObject = _gameController.CreateObject<TestObject>();
+                TestObject.Init(360f/maxCount * i);
+            }
+            _gameController.CreateObject<TestObject2>();
 
-            // TODO: use this.Content to load your game content here
+            //base.Initialize();
         }
+
+        protected override void LoadContent() { }
 
         protected override void Update(GameTime gameTime)
         {
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
-                if(_testObject.IsActive == true)
-                {
-                    _testObject.Disable();
-                }
-                else
-                {
-                    _testObject.Enable();
-                }
-
-            // TODO: Add your update logic here
             Updated?.Invoke();
-            base.Update(gameTime);
         }
 
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
-
-            // TODO: Add your drawing code here
-            //string text = "123";
-            //if (_testObject.TryGetContent("heart", out Texture2D aaa))
-            //    text = (aaa != null).ToString();
-
-            //SpriteFont spriteFont = Content.Load<SpriteFont>("font");
-            //Vector2 textMiddlePoint = spriteFont.MeasureString(text) / 2;
-            //_spriteBatch.Begin();
-            //Vector2 position = new Vector2(Window.ClientBounds.Width / 2, Window.ClientBounds.Height / 2);
-            //_spriteBatch.DrawString(spriteFont, text, position, Color.White, 0, textMiddlePoint, 1.0f, SpriteEffects.None, 0.5f);
-            //_spriteBatch.End();
-            _spriteBatch.Begin(); 
-            Drawed?.Invoke(_spriteBatch);
-            _spriteBatch.End();
-
-            base.Draw(gameTime);
-        }
-
-        public bool TryGetContent<T>(string assetName, out T content)
-        {
-            content = default;
-
-            try
-            {
-                content = Content.Load<T>(assetName);
-
-                return true;
-            }
-            catch
-            {
-                return false;
-            }
+            Drawed?.Invoke();
         }
     }
 }

@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Match3
+namespace Match3.Core.Components
 {
     public class Transform : Component
     {

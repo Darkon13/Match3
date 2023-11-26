@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Match3
+namespace Match3.Core.Components
 {
     public class SpriteRenderer : Component
     {
@@ -25,7 +25,6 @@ namespace Match3
 
         public override void Draw(SpriteBatch spriteBatch)
         {
-            //spriteBatch.Begin();
             float widthPerUnit = 1f / _texture2D.Width * PixelPerUnit;
             float heightPerUnit = 1f / _texture2D.Height * PixelPerUnit;
             Vector2 scale = _gameObject.Transform.Scale * new Vector2(widthPerUnit, heightPerUnit);
@@ -34,12 +33,12 @@ namespace Match3
             float posY = _gameObject.Transform.Position.Y - (_texture2D.Height * scale.Y) * Pivot.Y;
             Vector2 pos = new Vector2(posX, posY);
 
-            if (_texture2D != null)
+            if (_texture2D != null && spriteBatch != null)
+            {
+                spriteBatch.Begin();
                 spriteBatch.Draw(_texture2D, pos, null, Color, 0f, new Vector2(), scale, SpriteEffects.None, 1f);
-            
-            //spriteBatch.Draw()
-
-            //spriteBatch.End();
+                spriteBatch.End();
+            }
         }
     }
 }
