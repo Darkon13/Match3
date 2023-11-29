@@ -1,4 +1,5 @@
 ﻿using Match3.Core.Components;
+using Match3.Core.Utils;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
@@ -13,6 +14,7 @@ namespace Match3.Core
     {
         protected GameController GameController;
         private List<Component> _components;
+        private TimerController _timerController;
 
         public bool IsActive { get; private set; } = true;
         public Transform Transform { get; private set; }
@@ -20,6 +22,7 @@ namespace Match3.Core
         public GameObject(GameController gameController)
         {
             GameController = gameController;
+            _timerController = new TimerController();
             Transform = new Transform(this);
 
             _components = new List<Component>();
@@ -62,19 +65,13 @@ namespace Match3.Core
             _components.Add(component);
         }
 
-        //public bool TryGetContent<T>(string assetName, out T gameContent)
-        //{
-        //    gameContent = default;
+        public Timer CreateTimer(float seconds)
+        {
+            Timer timer = _timerController.CreateTimer();
+            timer.SetDuration(seconds);
 
-        //    if(Game.TryGetContent(assetName, out T content))
-        //    {
-        //        gameContent = content;
-
-        //        return true;
-        //    }
-
-        //    return false;
-        //}
+            return timer;
+        }
 
         public void Enable() 
         { 
@@ -98,19 +95,22 @@ namespace Match3.Core
 
         protected virtual void OnUpdate() { }
 
-        public void Update()
+        public void Update(TimeSpan tick)
         {
             if(IsActive == true)
+            {
                 OnUpdate();
+                _timerController.Update(tick);
+            }
         }
 
-        public void Draw(SpriteBatch spriteBatch)
+        public void Draw(SpriteBatch spriteBatch, RenderBuffer<GameObject> renderBuffer)
         {
             if(IsActive == true)
             {
                 foreach(Component component in _components)
                 {
-                    component.Draw(spriteBatch);
+                    component.Draw(spriteBatch, renderBuffer);
                 }
             }
         }

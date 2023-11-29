@@ -5,6 +5,7 @@ using Match3.Core.Utils.Input;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -19,6 +20,9 @@ namespace Match3
         private Vector2 _position;
         private KeyBinder _binder;
         private bool _inited;
+        //private Coroutine _coroutine;
+        private TimeSpan _delay;
+        private Timer _timer;
 
         public TestObject(GameController gameController) : base(gameController) { }
 
@@ -31,12 +35,13 @@ namespace Match3
             //AddComponent<SpriteRenderer>();
             //AddComponent<SpriteRenderer>();
             _binder = new KeyBinder();
+            //TestAnimation testAnimation = new TestAnimation();
 
             //Random random = new Random();
             //_angle = random.NextSingle() * 360;
 
             Window.WindowSizeChanged += OnWindowSizeChanged;
-            _binder.Bind(InputState.KeyDownOnce, MouseKeys.LeftKey, OnKeyDown);
+            //_binder.Bind(InputState.KeyDownOnce, MouseKeys.LeftKey, OnKeyDown);
             //MouseListener.KeyDownOnce += OnKeyDown;
         }
 
@@ -45,6 +50,15 @@ namespace Match3
             if(_inited == false)
             {
                 _angle = startAngle;
+                //_coroutine = new Coroutine(Rotate());
+                _delay = TimeSpan.FromSeconds(0);
+                //_angle += 1;
+                float posX = _position.X + MathF.Cos(_angle * (MathF.PI / 180)) * _radius;
+                float posY = _position.Y + MathF.Sin(_angle * (MathF.PI / 180)) * _radius;
+
+                Transform.Position = new Vector2(posX, posY);
+                _timer = CreateTimer(new Random().NextSingle());
+                _timer.Ended += Rotate;
 
                 _inited = true;
             }
@@ -54,12 +68,21 @@ namespace Match3
         {
             if(_inited == true)
             {
-                _angle += 1;
-                float posX = _position.X + MathF.Cos(_angle * (MathF.PI / 180)) * _radius;
-                float posY = _position.Y + MathF.Sin(_angle * (MathF.PI / 180)) * _radius;
 
-                Transform.Position = new Vector2(posX, posY);
+                //_coroutine.Update();
+                //if(_coroutine._enumerator == null);
             }
+        }
+
+        private void Rotate()
+        {
+            _angle += 1;
+            float posX = _position.X + MathF.Cos(_angle * (MathF.PI / 180)) * _radius;
+            float posY = _position.Y + MathF.Sin(_angle * (MathF.PI / 180)) * _radius;
+
+            Transform.Position = new Vector2(posX, posY);
+
+            _timer.Start();
         }
 
         private void OnWindowSizeChanged()

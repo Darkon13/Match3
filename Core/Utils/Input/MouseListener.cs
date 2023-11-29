@@ -33,15 +33,15 @@ namespace Match3.Core.Utils.Input
             }
         }
 
-        private static void Update()
+        private static void Update(TimeSpan tick)
         {
             MouseState mouseState = Mouse.GetState();
 
-            ClickHandler(mouseState);
-            PositionHandler(mouseState);
+            OnMouseClick(mouseState);
+            OnMousePositionChanged(mouseState);
         }
 
-        private static void ClickHandler(MouseState mouseState)
+        private static void OnMouseClick(MouseState mouseState)
         {
             if(CheckClick(mouseState, ButtonState.Pressed, out MouseKeys keyPressed))
             {
@@ -72,7 +72,7 @@ namespace Match3.Core.Utils.Input
             }
         }
 
-        private static void PositionHandler(MouseState mouseState)
+        private static void OnMousePositionChanged(MouseState mouseState)
         {
             if(mouseState.Position != _mousePosition)
             {

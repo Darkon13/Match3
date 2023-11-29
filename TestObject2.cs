@@ -13,11 +13,15 @@ namespace Match3
 {
     public class TestObject2 : GameObject
     {
+        private SpriteRenderer _spriteRenderer;
+        private float _angle = 0;
+
         public TestObject2(GameController gameController) : base(gameController) { }
 
         protected override void Awake()
         {
             AddComponent<SpriteRenderer>();
+            _spriteRenderer = GetComponent<SpriteRenderer>();
             MouseListener.MousePositionChanged += OnMousePositionChanged;
         }
 
@@ -29,6 +33,15 @@ namespace Match3
         protected override void OnDisable()
         {
             MouseListener.MousePositionChanged -= OnMousePositionChanged;
+        }
+
+        protected override void OnUpdate()
+        {
+            //_angle++;
+            //_spriteRenderer.SetPivot(1, 1);
+            //_spriteRenderer.SetPivot(1, 0);
+            //_spriteRenderer.SetPivot(0, 1);
+            //_spriteRenderer.SetPivot(0, 0);
         }
 
         private void OnMousePositionChanged(Point point)

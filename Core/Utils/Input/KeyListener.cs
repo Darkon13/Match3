@@ -26,7 +26,7 @@ namespace Match3.Core.Utils.Input
             }
         }
 
-        private static void Update()
+        private static void Update(TimeSpan tick)
         {
             foreach(Keys key in Enum.GetValues(typeof(Keys)))
             {
