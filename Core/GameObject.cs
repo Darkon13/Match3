@@ -47,7 +47,7 @@ namespace Match3.Core
             return null;
         }
 
-        public void AddComponent<T>() where T : Component
+        public T AddComponent<T>() where T : Component
         {
             Component component = ComponentFactory.GetComponent<T>(this, GameController);
 
@@ -57,15 +57,17 @@ namespace Match3.Core
                 {
                     if(componentFromGameObject is T)
                     {
-                        return;
+                        return null;
                     }
                 }
             }
 
             _components.Add(component);
+
+            return (T)component;
         }
 
-        public Timer CreateTimer(float seconds)
+        public Timer CreateTimer(double seconds)
         {
             Timer timer = _timerController.CreateTimer();
             timer.SetDuration(seconds);

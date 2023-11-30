@@ -21,7 +21,7 @@ namespace Match3.Core.Utils
             _current = TimeSpan.Zero;
         }
 
-        public void SetDuration(float seconds) 
+        public void SetDuration(double seconds) 
         {
             if(seconds > 0)
             {
@@ -43,7 +43,7 @@ namespace Match3.Core.Utils
             {
                 _current = _current + tick;
             }
-            else
+            else if(_current >= _duration)
             {
                 Stop();
 

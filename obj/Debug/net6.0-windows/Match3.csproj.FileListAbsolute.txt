@@ -37,3 +37,11 @@ D:\Projects\Match3\obj\Debug\net6.0-windows\Match3.pdb
 D:\Projects\Match3\obj\Debug\net6.0-windows\Match3.genruntimeconfig.cache
 D:\Projects\Match3\bin\Debug\net6.0-windows\Content\font.xnb
 D:\Projects\Match3\bin\Debug\net6.0-windows\Content\heart.xnb
+D:\Projects\Match3\bin\Debug\net6.0-windows\Content\bomb.xnb
+D:\Projects\Match3\bin\Debug\net6.0-windows\Content\cell.xnb
+D:\Projects\Match3\bin\Debug\net6.0-windows\Content\circle.xnb
+D:\Projects\Match3\bin\Debug\net6.0-windows\Content\horizontal_bonus.xnb
+D:\Projects\Match3\bin\Debug\net6.0-windows\Content\square.xnb
+D:\Projects\Match3\bin\Debug\net6.0-windows\Content\star.xnb
+D:\Projects\Match3\bin\Debug\net6.0-windows\Content\triangle.xnb
+D:\Projects\Match3\bin\Debug\net6.0-windows\Content\vertical_bonus.xnb

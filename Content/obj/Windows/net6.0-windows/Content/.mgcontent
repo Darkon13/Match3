@@ -4,10 +4,26 @@
   <Platform>Windows</Platform>
   <Config />
   <SourceFiles>
+    <File>D:/Projects/Match3/Content/bomb.png</File>
+    <File>D:/Projects/Match3/Content/cell.png</File>
+    <File>D:/Projects/Match3/Content/circle.png</File>
     <File>D:/Projects/Match3/Content/font.spritefont</File>
     <File>D:/Projects/Match3/Content/heart.png</File>
+    <File>D:/Projects/Match3/Content/horizontal_bonus.png</File>
+    <File>D:/Projects/Match3/Content/square.png</File>
+    <File>D:/Projects/Match3/Content/star.png</File>
+    <File>D:/Projects/Match3/Content/triangle.png</File>
+    <File>D:/Projects/Match3/Content/vertical_bonus.png</File>
   </SourceFiles>
   <DestFiles>
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
     <File xsi:nil="true" />
     <File xsi:nil="true" />
   </DestFiles>

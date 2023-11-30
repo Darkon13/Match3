@@ -17,11 +17,6 @@ namespace Match3.Core
         private SpriteBatch _spriteBatch;
         private List<GameObject> _gameObjects;
         private RenderBuffer<GameObject> _gameObjectRenderBuffer;
-        private GameObject _selected;
-        private Vector2 _point;
-
-        private Point _mousePoint;
-        private KeyBinder _keyBinder;
 
         public Texture2D DefaultTexture { get; private set; }
 
@@ -30,13 +25,6 @@ namespace Match3.Core
             _game = game;
             _spriteBatch = spriteBatch;
             _gameObjectRenderBuffer = renderBuffer;
-            _mousePoint = MouseListener.MousePosition;
-
-            _keyBinder = new KeyBinder();
-            _keyBinder.Bind(InputState.KeyDownOnce, MouseKeys.LeftKey, OnMouseKeyDownOnce);
-            _keyBinder.Bind(InputState.KeyDown, MouseKeys.LeftKey, OnMouseKeyDown);
-            _keyBinder.Bind(InputState.KeyUp, MouseKeys.LeftKey, OnMouseKeyUp);
-
             _gameObjects = new List<GameObject>();
 
             if (TryGetContent("heart", out Texture2D texture2D))
@@ -44,7 +32,6 @@ namespace Match3.Core
                 DefaultTexture = texture2D;
             }
 
-            MouseListener.MousePositionChanged += OnMousePositionChanged;
             _game.Updated += UpdateObjects;
             _game.Drawed += DrawObjects;
         }
@@ -83,34 +70,18 @@ namespace Match3.Core
             }
         }
 
-        private void OnMouseKeyDownOnce()
+        public bool Raycast(Point point, out GameObject gameObject)
         {
-            if(_gameObjectRenderBuffer.TryGetObjects(_mousePoint, out List<GameObject> gameObjects))
+            gameObject = null;
+
+            if(_gameObjectRenderBuffer.TryGetObjects(point, out List<GameObject> objects))
             {
-                foreach(GameObject gameObject in gameObjects)
-                {
-                    _selected = gameObject;
-                    _point = _selected.Transform.Position - _mousePoint.ToVector2();
-                }
+                gameObject = objects[0];
+
+                return true;
             }
-        }
 
-        private void OnMouseKeyDown()
-        {
-            if (_selected != null)
-            {
-                _selected.Transform.Position = (_mousePoint).ToVector2() + _point;
-            }
-        }
-
-        private void OnMouseKeyUp()
-        {
-            _selected = null;
-        }
-
-        private void OnMousePositionChanged(Point point)
-        {
-            _mousePoint = point;
+            return false;
         }
 
         private void UpdateObjects(TimeSpan gameTime)
