@@ -17,6 +17,13 @@ namespace Match3.Core.Components
             GameObject = gameObject;
         }
 
+        public void Start()
+        {
+            StartAction();
+        }
+
+        protected virtual void StartAction() { }
+
         public void Update()
         {
             if(Animate() == true)

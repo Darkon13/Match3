@@ -22,8 +22,6 @@ namespace Match3
         private RenderBuffer<GameObject> _gameObjectRenderBuffer;
         private RenderBuffer<UIElement> _uiElementsRenderBuffer;
 
-        private int _counter = 0;
-
         public event Action<TimeSpan> Updated;
         public event Action Drawed;
 
@@ -47,48 +45,19 @@ namespace Match3
 
             _spriteBatch = new SpriteBatch(GraphicsDevice);
             _gameController = new GameController(this, _spriteBatch, _gameObjectRenderBuffer);
+
             ObjectPool<Gem> objectPool = _gameController.CreateObject<ObjectPool<Gem>>();
             objectPool.Init(64);
+
             GemViewFactory gemViewFactory = new GemViewFactory(_gameController);
+
             GemFactory gemFactory = new GemFactory(gemViewFactory);
+
             Grid grid = _gameController.CreateObject<Grid>();
-            grid.Init(8, 8, gemFactory, objectPool, 32);
+            grid.Init(8, 8, gemFactory, objectPool, 48);
+
             GridSelector gridSelector = _gameController.CreateObject<GridSelector>();
             gridSelector.Init(grid);
-
-            //_gameController.AddObject(new TestObject(_gameController));
-            //int maxCount = 10;
-            //for(int i = 0; i < 10; i++)
-            //{
-            //    TestObject testObject = _gameController.CreateObject<TestObject>();
-            //    if(testObject.TryGetComponent(out SpriteRenderer spriteRenderer))
-            //    {
-            //        spriteRenderer.Color = new Color(Vector3.One / 10 * i);
-            //    }
-            //    testObject.Init(360f/maxCount * i);
-            //}
-            //TestObject2 a1 = _gameController.CreateObject<TestObject2>();
-            //if(a1.TryGetComponent(out SpriteRenderer b1))
-            //{
-            //    b1.SetPivot(1, 1);
-            //}
-            //TestObject2 a2 = _gameController.CreateObject<TestObject2>();
-            //if (a2.TryGetComponent(out SpriteRenderer b2))
-            //{
-            //    b2.SetPivot(1, 0);
-            //}
-            //TestObject2 a3 = _gameController.CreateObject<TestObject2>();
-            //if (a3.TryGetComponent(out SpriteRenderer b3))
-            //{
-            //    b3.SetPivot(0, 1);
-            //}
-            //TestObject2 a4 = _gameController.CreateObject<TestObject2>();
-            //if (a4.TryGetComponent(out SpriteRenderer b4))
-            //{
-            //    b4.SetPivot(0, 0);
-            //}
-
-            //base.Initialize();
         }
 
         protected override void Update(GameTime gameTime)

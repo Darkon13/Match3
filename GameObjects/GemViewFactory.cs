@@ -12,6 +12,7 @@ namespace Match3.GameObjects
         private const string SquareTexture = "square";
         private const string StarTexture = "star";
         private const string TriangleTexture = "triangle";
+        private const string LightningTexture = "molniya";
 
         private const string BombTexture = "bomb";
         private const string HorizontalBonusTexture = "horizontal_bonus";
@@ -38,6 +39,9 @@ namespace Match3.GameObjects
 
             if (_gameController.TryGetContent(TriangleTexture, out Texture2D triangle))
                 _gemViews.Add(new GemView(Color.Green, triangle));
+
+            if (_gameController.TryGetContent(LightningTexture, out Texture2D lightning))
+                _gemViews.Add(new GemView(Color.Yellow, lightning));
         }
 
         public GemView GetRandomGemView()

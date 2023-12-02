@@ -1,9 +1,2 @@
 Source File,Dest File,Processor Type,Content Type,Source File Size,Dest File Size,Build Seconds
-"D:/Projects/Match3/Content/bomb.png","D:/Projects/Match3/Content/bin/Windows/bomb.xnb","TextureProcessor","Texture2DContent",2697,16469,0,1301074
-"D:/Projects/Match3/Content/cell.png","D:/Projects/Match3/Content/bin/Windows/cell.xnb","TextureProcessor","Texture2DContent",677,16469,0,0021821
-"D:/Projects/Match3/Content/circle.png","D:/Projects/Match3/Content/bin/Windows/circle.xnb","TextureProcessor","Texture2DContent",1186,16469,0,0020473
-"D:/Projects/Match3/Content/horizontal_bonus.png","D:/Projects/Match3/Content/bin/Windows/horizontal_bonus.xnb","TextureProcessor","Texture2DContent",822,16469,0,002123
-"D:/Projects/Match3/Content/square.png","D:/Projects/Match3/Content/bin/Windows/square.xnb","TextureProcessor","Texture2DContent",658,16469,0,0009432
-"D:/Projects/Match3/Content/star.png","D:/Projects/Match3/Content/bin/Windows/star.xnb","TextureProcessor","Texture2DContent",1435,16469,0,0013658
-"D:/Projects/Match3/Content/triangle.png","D:/Projects/Match3/Content/bin/Windows/triangle.xnb","TextureProcessor","Texture2DContent",1250,16469,0,0009493
-"D:/Projects/Match3/Content/vertical_bonus.png","D:/Projects/Match3/Content/bin/Windows/vertical_bonus.xnb","TextureProcessor","Texture2DContent",661,16469,0,0011794
+"D:/Projects/Match3/Content/molniya.png","D:/Projects/Match3/Content/bin/Windows/molniya.xnb","TextureProcessor","Texture2DContent",977,16469,0,135019

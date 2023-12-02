@@ -13,10 +13,15 @@ namespace Match3.GameObjects
     {
         private GemType _gemType;
         private SpriteRenderer _spriteRenderer;
+        private Animator _animator;
+        private Point _point;
         private bool _inited = false;
         private float _layer = 0.1f;
 
+        public Color Color { get; private set; }
+
         public event Action ActionEnded;
+        public event Action<Point> AnimationEnded;
 
         public Gem(GameController gameController) : base(gameController) { }
 
@@ -24,15 +29,19 @@ namespace Match3.GameObjects
         {
             _spriteRenderer = AddComponent<SpriteRenderer>();
             _spriteRenderer.Layer = _layer;
+            _animator = AddComponent<Animator>();
+            _animator.SetDuration(0.1f);
+            _animator.SetAnimationController(new GemAnimationController(this));
         }
 
         protected override void OnDisable()
         {
             if (_inited == true)
             {
-                _gemType.Ended -= OnActionEnded;
-
                 _inited = false;
+
+                //_gemType.Ended -= OnActionEnded;
+                //_animator.AnimationEnded -= OnAnimationEnded;
             }
         }
 
@@ -42,25 +51,39 @@ namespace Match3.GameObjects
             {
                 _gemType = gemType;
 
+                Color = _gemType.View.Color;
+
                 _spriteRenderer.Texture2D = _gemType.View.Texture2D;
                 _spriteRenderer.Color = _gemType.View.Color;
 
-                _gemType.Ended += OnActionEnded;
+                //_gemType.Ended += OnActionEnded;
+                //_animator.AnimationEnded += OnAnimationEnded;
 
                 _inited = true;
             }
         }
 
+        public void StartAnimation(string animation, Point point)
+        {
+            _animator.StartAnimation(animation);
+
+            _point = point;
+        }
+
         public void Destroy(Grid grid, Point point)
         {
+            Disable();
             _gemType.CallAction(grid, point);
         }
 
-        public void OnActionEnded()
+        private void OnAnimationEnded()
+        {
+            AnimationEnded?.Invoke(_point);
+        }
+
+        private void OnActionEnded()
         {
             ActionEnded?.Invoke();
-
-            Disable();
         }
     }
 }

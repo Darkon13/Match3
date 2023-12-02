@@ -21,11 +21,14 @@ namespace Match3.GameObjects
             int minX = Math.Max(0, point.X - _radius);
             int minY = Math.Max(0, point.Y - _radius);
 
-            for(int i = minX; i < maxX; i++)
+            for(int i = minX; i <= maxX; i++)
             {
-                for(int j = minY; j < maxY; j++)
+                for(int j = minY; j <= maxY; j++)
                 {
-                    grid.DestroyGem(new Point(i, j));
+                    Point destroyPoint = new Point(i, j);
+
+                    if(destroyPoint != point && Vector2.Distance(destroyPoint.ToVector2(), point.ToVector2()) <= _radius)
+                        grid.DestroyGem(new Point(i, j));
                 }
             }
 

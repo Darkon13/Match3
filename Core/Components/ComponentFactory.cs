@@ -18,6 +18,10 @@ namespace Match3.Core.Components
             {
                 return new Transform(gameObject);
             }
+            else if (typeof(T) == typeof(Animator))
+            {
+                return new Animator(gameObject, gameObject.CreateTimer(1f));
+            }
             else
             {
                 return null;

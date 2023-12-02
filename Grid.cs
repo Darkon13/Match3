@@ -5,9 +5,6 @@ using Match3.GameObjects;
 using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Match3
 {
@@ -16,22 +13,27 @@ namespace Match3
         private GemFactory _gemFactory;
         private ObjectPool<Gem> _objectPool;
         private Vector2 _pivot;
+        private List<Point> _destroyedGems;
+        private List<Point> _pointsToCheck;
+        private Dictionary<Gem, List<Point>> _moveList;
         private Dictionary<Point, Cell> _cells;
-        private int _activeEventsCount;
 
-        private int _tickPerSwap = 10;
-        private float _swapDuration = 0.1f;
-        private float _swapT;
-        private Timer _swapTimer;
-        private Cell _cellFrom;
-        private Cell _cellTo;
+        private Point _pointFrom;
+        private Point _pointTo;
+
+        private int _tickPerMove = 10;
+        private float _moveDuration = 0.1f;
+        private float _moveT = 0;
+        private Timer _moveTimer;
 
         public int LineCount { get; private set; }
         public int ColumnCount { get; private set; }
         public float Width { get; private set; }
         public float Height { get; private set; }
-        public bool Locked => _activeEventsCount > 0;
+        public bool Locked { get; private set; }
         public Vector2 Size => new Vector2(Width, Height);
+
+        public event Action Moved;
 
         public Grid(GameController gameController) : base(gameController) { }
 
@@ -42,18 +44,27 @@ namespace Match3
                 return;
             }
 
+            _moveList = new Dictionary<Gem, List<Point>>(lines * columns);
+            _destroyedGems = new List<Point>(lines * columns);
+            _pointsToCheck = new List<Point>(lines * columns);
+            _cells = new Dictionary<Point, Cell>(lines * columns);
+
+            Width = lines * cellSize + (lines - 1) * distanceBetweenX;
+            Height = columns * cellSize + (columns - 1) * distanceBetweenY;
+
             LineCount = lines;
             ColumnCount = columns;
 
             Transform.Position = new Vector2(Window.WindowBound.Width / 2, Window.WindowBound.Height / 2);
+
             _pivot = new Vector2(0.5f, 0.5f);
-            _activeEventsCount = 0;
 
             _gemFactory = gemFactory;
             _objectPool = objectPool;
 
-            _swapTimer = CreateTimer(_swapDuration/_tickPerSwap);
-            _swapTimer.Ended += OnSwap;
+            _moveTimer = CreateTimer(_moveDuration/_tickPerMove);
+            _moveTimer.Ended += MoveGems;
+            Moved += SearchCombination;
 
             GenerateField(lines, columns, cellSize, distanceBetweenX, distanceBetweenY);
         }
@@ -62,67 +73,238 @@ namespace Match3
         {
             if(Locked == false)
             {
-                _cellFrom = _cells[from];
-                _cellTo = _cells[to];
+                if(_cells[from].Gem != null && _cells[to].Gem != null)
+                {
+                    if(_cells[from].Gem.IsActive && _cells[to].Gem.IsActive)
+                    {
+                        int lenghtX = Math.Abs(from.X - to.X);
+                        int lenghtY = Math.Abs(from.Y - to.Y);
 
-                _swapT = 0;
+                        if ((lenghtX <= 1 && lenghtY <= 1) && lenghtX != lenghtY)
+                        {
+                            _pointFrom = from;
+                            _pointTo = to;
 
-                _activeEventsCount++;
+                            RegisterToMove(_pointFrom, _pointTo);
+                            RegisterToMove(_pointTo, _pointFrom);
 
-                _swapTimer.Start();
+                            StartMove();
+
+                            Moved += OnSwap;
+
+                            Locked = true;
+                        }
+                    }
+                }
             }
         }
 
         private void OnSwap()
         {
-            if(_swapT < 1f)
+            bool resultFrom = DestroyCombination(_pointFrom);
+            bool resultTo = DestroyCombination(_pointTo);
+
+            if (resultFrom == false && resultTo == false)
             {
-                _swapT += 1f / _tickPerSwap;
+                RegisterToMove(_pointFrom, _pointTo);
+                RegisterToMove(_pointTo, _pointFrom);
 
-                _cellFrom.Gem.Transform.Position = Vector2.Lerp(_cellFrom.Transform.Position, _cellTo.Transform.Position, _swapT);
-                _cellTo.Gem.Transform.Position = Vector2.Lerp(_cellTo.Transform.Position, _cellFrom.Transform.Position, _swapT);
-
-                _swapTimer.Start();
+                StartMove();
             }
             else
             {
-                Gem gem = _cellFrom.Gem;
+                RegisterToMoveDown();
 
-                _cellFrom.Gem = _cellTo.Gem;
-                _cellTo.Gem = gem;
-
-                DestroyGem(_cellTo.Point);
-                _cellTo.Gem = CreateBonus<BombGem>(_cellTo.Transform.Position, _cellTo.Transform.Scale, Color.Red);
-
-                _activeEventsCount--;
+                StartMove();
             }
+
+            Moved -= OnSwap;
         }
 
         public void DestroyGem(Point point)
         {
-            _cells[point].Gem.Destroy(this, point);
+            if(_cells[point].Gem != null && _cells[point].Gem.IsActive == true)
+            {
+                _cells[point].Gem.Destroy(this, point);
+
+                _destroyedGems.Add(point);
+
+                //_cells[point].Gem.AnimationEnded += OnDestroy;
+
+                //_cells[point].Gem.StartAnimation("Destroy", point);
+            }
         }
 
-        private Gem CreateGem(Vector2 position, Vector2 scale)
+        //private void OnDestroy(Point point)
+        //{
+        //    _cells[point].Gem.Destroy(this, point);
+
+        //    _destroyedGems.Add(point);
+
+        //    _cells[point].Gem.AnimationEnded -= OnDestroy;
+        //}
+
+        private void SearchCombination()
         {
-            Color color = Color.White;
+            int count = _destroyedGems.Count;
 
-            if(_objectPool.TryGetObject(out Gem gem))
+            foreach(Point point in _pointsToCheck)
             {
-                gem.Init(_gemFactory.Create<BaseGem>(color));
-                gem.Transform.Position = position;
-                gem.Transform.SetScale(scale);
-                gem.Enable();
+                DestroyCombination(point);
+            }
+            
+            _pointsToCheck.Clear();
 
-                return gem;
+            if (count != _destroyedGems.Count)
+            {
+                RegisterToMoveDown();
+
+                StartMove();
+            }
+            else
+            {
+                if(_destroyedGems.Count != 0)
+                {
+                    RestoreGems();
+                }
+            }
+        }
+
+        private void RestoreGems()
+        {
+            foreach(Point point in _destroyedGems)
+            {
+                _cells[point].Gem = CreateGem<BaseGem>(_cells[point].Transform.Position, _cells[point].Transform.Scale, Color.White);
             }
 
-            return null;
+            _pointsToCheck.AddRange(_destroyedGems);
+            _destroyedGems.Clear();
+
+            SearchCombination();
         }
 
-        private Gem CreateBonus<T>(Vector2 position, Vector2 scale, Color color) where T : GemType
+        private void RegisterToMove(Point from, Point to)
         {
-            if (_objectPool.TryGetObject(out Gem gem))
+            Gem gem = _cells[from].Gem;
+
+            if(gem != null)
+            {
+                if (_moveList.ContainsKey(gem))
+                {
+                    _moveList[gem] = new List<Point>{ from, to };
+                }
+                else
+                {
+                    _moveList.Add(gem, new List<Point> { from, to });
+                }
+            }
+        }
+
+        private void RegisterToMoveDown()
+        {
+            Dictionary<int, List<int>> pointsToMove = new Dictionary<int, List<int>>();
+
+            foreach (Point point in _destroyedGems)
+            {
+                if (pointsToMove.ContainsKey(point.X))
+                {
+                    if (pointsToMove[point.X][0] < point.Y)
+                    {
+                        pointsToMove[point.X][0] = point.Y;
+                    }
+
+                    pointsToMove[point.X][1]++;
+                }
+                else
+                {
+                    pointsToMove.Add(point.X, new List<int> { point.Y, 1 });
+                }
+            }
+
+            _destroyedGems.Clear();
+
+            foreach (int column in pointsToMove.Keys)
+            {
+                int y = pointsToMove[column][0];
+
+                Point point = new Point(column, y);
+
+                for (int j = y - 1; j >= 0; j--)
+                {
+                    Point swapPoint = new Point(point.X, j);
+
+                    if (_cells[swapPoint].Gem != null && _cells[swapPoint].Gem.IsActive == true && _moveList.ContainsKey(_cells[swapPoint].Gem) == false)
+                    {
+                        RegisterToMove(swapPoint, point);
+                        _cells[swapPoint].Gem = null;
+                        
+                        _pointsToCheck.Add(point);
+
+                        point.Y = point.Y - 1;
+                    }
+                }
+
+                _cells[point].Gem = null;
+
+                _pointsToCheck.Add(point);
+
+                for (int j = 0; j < pointsToMove[column][1]; j++)
+                {
+                    _destroyedGems.Add(new Point(point.X, j));
+                }
+            }
+        }
+
+        private void StartMove()
+        {
+            _moveTimer.Start();
+            _moveT = 0;
+
+            Locked = true;
+        }
+
+        private void MoveGems()
+        {
+            if(_moveT < 1f && _moveList.Count > 0)
+            {
+                _moveT = MathF.Min(1f, _moveT + (1f / _tickPerMove));
+
+                foreach(Gem gem in _moveList.Keys)
+                {
+                    Vector2 from = _cells[_moveList[gem][0]].Transform.Position;
+                    Vector2 to = _cells[_moveList[gem][1]].Transform.Position;
+
+                    gem.Transform.Position = Vector2.Lerp(from, to, _moveT);
+                }
+
+                _moveTimer.Start();
+            }
+            else
+            {
+                foreach (Gem gem in _moveList.Keys)
+                {
+                    _cells[_moveList[gem][1]].Gem = gem;
+                }
+
+                _moveList.Clear();
+
+                Locked = false;
+
+                Moved?.Invoke();
+            }
+        }
+
+        private void ChangeBaseGem<T>(Point point) where T : GemType
+        {
+            Color color = _cells[point].GemColor;
+
+            _cells[point].Gem.Destroy(this, point);
+            _cells[point].Gem = CreateGem<T>(_cells[point].Transform.Position, _cells[point].Transform.Scale, color);
+        }
+
+        private Gem CreateGem<T>(Vector2 position, Vector2 scale, Color color) where T : GemType
+        {
+            if(_objectPool.TryGetObject(out Gem gem))
             {
                 gem.Init(_gemFactory.Create<T>(color));
                 gem.Transform.Position = position;
@@ -135,16 +317,244 @@ namespace Match3
             return null;
         }
 
+        private Gem CreateDifferentGem(Vector2 position, Vector2 scale, Point point)
+        {
+            Gem gem = null;
+
+            bool isDifferentGem = false;
+            bool isColorInColumnDifferent = true;
+            bool isColorInLineDifferent = true;
+
+            Color colorInColumn = Color.White;
+            Color colorInLine = Color.White;
+
+            if (Math.Max(0, point.X - 1) != 0)
+            {
+                Point point1 = new Point(point.X - 2, point.Y);
+                Point point2 = new Point(point.X - 1, point.Y);
+
+                if (_cells[point1].Gem != null && _cells[point2].Gem != null)
+                {
+                    if (_cells[point1].GemColor == _cells[point2].GemColor)
+                    {
+                        colorInColumn = _cells[point1].GemColor;
+                        isColorInColumnDifferent = false;
+                    }
+                    else
+                    {
+                        isColorInColumnDifferent = true;
+                    }
+                }
+                else
+                {
+                    isColorInColumnDifferent = true;
+                }
+            }
+
+            if (Math.Max(0, point.Y - 1) != 0)
+            {
+                Point point1 = new Point(point.X, point.Y - 2);
+                Point point2 = new Point(point.X, point.Y - 1);
+
+                if (_cells[point1].Gem != null && _cells[point2].Gem != null)
+                {
+                    if (_cells[point1].GemColor == _cells[point2].GemColor)
+                    {
+                        colorInLine = _cells[point1].GemColor;
+                        isColorInLineDifferent = false;
+                    }
+                    else
+                    {
+                        isColorInLineDifferent = true;
+                    }
+                }
+                else
+                {
+                    isColorInLineDifferent = true;
+                }
+            }
+
+            while (isDifferentGem != true)
+            {
+                gem = CreateGem<BaseGem>(position, scale, Color.White);
+
+                isDifferentGem = true;
+
+                if (isColorInLineDifferent == true && isColorInColumnDifferent == true)
+                {
+                    break;
+                }
+                else
+                {
+                    if (gem.Color == colorInLine)
+                    {
+                        isDifferentGem = false;
+
+                        gem.Disable();
+                    }
+
+                    if (isDifferentGem == true)
+                    {
+                        if (gem.Color == colorInColumn)
+                        {
+                            isDifferentGem = false;
+
+                            gem.Disable();
+                        }
+                    }
+                }
+            }
+
+            return gem;
+        }
+
+        private bool DestroyCombination(Point searchPoint)
+        {
+            if (FindCombinationInPoint(searchPoint, out List<Point> line, out List<Point> column))
+            {
+                List<Point> pointsToDesctruct = new List<Point>();
+
+                if (line.Count >= 2)
+                {
+                    pointsToDesctruct.AddRange(line);
+                }
+
+                if (column.Count >= 2)
+                {
+                    pointsToDesctruct.AddRange(column);
+                }
+
+                if (pointsToDesctruct.Count > 0)
+                {
+                    if (line.Count >= 2 && column.Count >= 2)
+                    {
+                        ChangeBaseGem<BombGem>(searchPoint);
+                    }
+                    else if (line.Count >= 3)
+                    {
+                        ChangeBaseGem<HorizontalBonusGem>(searchPoint);
+                    }
+                    else if (column.Count >= 3)
+                    {
+                        ChangeBaseGem<VerticalBonusGem>(searchPoint);
+                    }
+                    else
+                    {
+                        pointsToDesctruct.Add(searchPoint);
+                    }
+                }
+
+                foreach (Point point in pointsToDesctruct)
+                {
+                    DestroyGem(point);
+                }
+
+                return pointsToDesctruct.Count > 0;
+            }
+
+            return false;
+        }
+
+        private bool FindCombinationInPoint(Point point, out List<Point> lines, out List<Point> column) 
+        {
+            lines = new List<Point>();
+            column = new List<Point>();
+
+            lines.AddRange(FindCombinationInDirection(point, true, false, false));
+            lines.AddRange(FindCombinationInDirection(point, true, false, true));
+            column.AddRange(FindCombinationInDirection(point, false, true, false));
+            column.AddRange(FindCombinationInDirection(point, false, true, true));
+
+            return lines.Count > 0 || column.Count > 0;
+        }
+
+        private List<Point> FindCombinationInDirection(Point point, bool isX, bool isY, bool isNegative)
+        {
+            List<Point> result = new List<Point>();
+
+            if (isX == true && isY == true)
+            {
+                return result;
+            }
+
+            if(_cells[point].Gem != null && _cells.ContainsKey(point) && _cells[point].Gem.IsActive == true)
+            {
+                Color color = _cells[point].GemColor;
+                Point currentPoint = point;
+                bool isFinish = false;
+
+                while(isFinish == false)
+                {
+                    if(isX == true)
+                    {
+                        if(isNegative == true)
+                        {
+                            currentPoint.X = currentPoint.X - 1;
+
+                            if(currentPoint.X < 0)
+                            {
+                                isFinish = true;
+
+                                break;
+                            }
+                        }
+                        else
+                        {
+                            currentPoint.X = currentPoint.X + 1;
+
+                            if (currentPoint.X >= LineCount)
+                            {
+                                isFinish = true;
+
+                                break;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if (isNegative == true)
+                        {
+                            currentPoint.Y = currentPoint.Y - 1;
+
+                            if (currentPoint.Y < 0)
+                            {
+                                isFinish = true;
+
+                                break;
+                            }
+                        }
+                        else
+                        {
+                            currentPoint.Y = currentPoint.Y + 1;
+
+                            if (currentPoint.Y >= ColumnCount)
+                            {
+                                isFinish = true;
+
+                                break;
+                            }
+                        }
+                    }
+
+                    if(_cells[currentPoint].Gem != null && _cells[currentPoint].Gem.IsActive == true && _cells[currentPoint].GemColor == color)
+                    {
+                        result.Add(currentPoint);
+                    }
+                    else
+                    {
+                        isFinish = true;
+                    }
+                }
+            }
+
+            return result;
+        }
+
         private void GenerateField(int lines, int columns, int cellSize = 64, int distanceBetweenX = 0, int distanceBetweenY = 0)
         {
-            _cells = new Dictionary<Point, Cell>(lines * columns);
-
-            Width = lines * cellSize + (lines - 1) * distanceBetweenX;
-            Height = columns * cellSize + (columns - 1) * distanceBetweenY;
-
-            for (int i = 0; i < lines; i++)
+            for (int i = 0; i < columns; i++)
             {
-                for (int j = 0; j < columns; j++)
+                for (int j = 0; j < lines; j++)
                 {
                     Cell cell = GameController.CreateObject<Cell>();
                     cell.Init(new Point(i, j));
@@ -158,7 +568,7 @@ namespace Match3
                         cell.Transform.SetScale((float)cellSize / spriteRenderer.PixelPerUnit, (float)cellSize / spriteRenderer.PixelPerUnit);
                     }
 
-                    cell.Gem = CreateGem(cell.Transform.Position, cell.Transform.Scale);
+                    cell.Gem = CreateDifferentGem(cell.Transform.Position, cell.Transform.Scale, new Point(i, j));
                     _cells.Add(new Point(i, j), cell);
                 }
             }

@@ -77,13 +77,7 @@ namespace Match3.GameObjects
                     }
                     else
                     {
-                        int lenghtX = Math.Abs(_selectedCell.Point.X - cell.Point.X);
-                        int lenghtY = Math.Abs(_selectedCell.Point.Y - cell.Point.Y);
-
-                        if ((lenghtX == 1 || lenghtY == 1) && lenghtX != lenghtY)
-                        {
-                            _grid.Swap(_selectedCell.Point, cell.Point);
-                        }
+                        _grid.Swap(_selectedCell.Point, cell.Point);
 
                         _spriteRenderer.Color = Color.White;
                         _selectedCell = null;

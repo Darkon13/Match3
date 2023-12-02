@@ -15,6 +15,7 @@ namespace Match3.GameObjects
 
         public Gem Gem { get; set; }
         public Point Point { get; private set; }
+        public Color GemColor => Gem.Color;
 
         public event Action PositionChanged;
         

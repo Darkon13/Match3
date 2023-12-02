@@ -45,3 +45,4 @@ D:\Projects\Match3\bin\Debug\net6.0-windows\Content\square.xnb
 D:\Projects\Match3\bin\Debug\net6.0-windows\Content\star.xnb
 D:\Projects\Match3\bin\Debug\net6.0-windows\Content\triangle.xnb
 D:\Projects\Match3\bin\Debug\net6.0-windows\Content\vertical_bonus.xnb
+D:\Projects\Match3\bin\Debug\net6.0-windows\Content\molniya.xnb

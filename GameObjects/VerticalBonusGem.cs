@@ -14,7 +14,15 @@ namespace Match3.GameObjects
 
         public override void CallAction(Grid grid, Point point)
         {
+            for(int i = 0; i < grid.LineCount; i++)
+            {
+                Point pointToDestroy = new Point(point.X, i);
 
+                if(pointToDestroy != point)
+                    grid.DestroyGem(pointToDestroy);
+            }
+
+            CallEvent();
         }
     }
 }

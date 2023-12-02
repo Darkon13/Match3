@@ -31,8 +31,9 @@ namespace Match3.Core.Components
             if (_animations.ContainsKey(animationName))
             {
                 _currentAnimation = _animations[animationName];
-                _currentAnimation.Update();
                 _currentAnimation.Ended += OnAnimationEnd;
+                _currentAnimation.Start();
+                _currentAnimation.Update();
 
                 return true;
             }
@@ -75,8 +76,11 @@ namespace Match3.Core.Components
 
         private void OnAnimationEnd()
         {
-            _currentAnimation.Ended -= AnimationEnded;
-            _currentAnimation = null;
+            if(_currentAnimation != null)
+            {
+                _currentAnimation.Ended -= AnimationEnded;
+                _currentAnimation = null;
+            }
 
             AnimationEnded?.Invoke();
         }
