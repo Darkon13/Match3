@@ -130,32 +130,35 @@ namespace Match3.Core.UIElements
         {
             _mousePoint = point;
 
-            if (RaycastOnMousePoint(out UIElement uiElement))
+            if(_leftKeyDownOnce == false)
             {
+                if (RaycastOnMousePoint(out UIElement uiElement))
+                {
+                    if(_choosedElement != null)
+                    {
+                        _choosedElement.OnMouseExit();
+                    }
+
+                    _choosedElement = uiElement;
+                    _choosedElement.OnMouseEnter();
+
+                    return;
+                }
+
                 if(_choosedElement != null)
                 {
                     _choosedElement.OnMouseExit();
+                    _choosedElement = null;
                 }
-
-                _choosedElement = uiElement;
-                _choosedElement.OnMouseEnter();
-
-                return;
-            }
-
-            if(_choosedElement != null)
-            {
-                _choosedElement.OnMouseExit();
-                _choosedElement = null;
             }
         }
 
         private void OnWindowSizeChanged()
         {
-            Width = Window.WindowBound.Width;
-            Height = Window.WindowBound.Height;
+            //Width = Window.WindowBound.Width;
+            //Height = Window.WindowBound.Height;
 
-            SizeChanged?.Invoke(Width, Height);
+            //SizeChanged?.Invoke(Width, Height);
         }
     }
 }

@@ -1,14 +1,12 @@
 ﻿using Match3.Core.Utils;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using System;
 
 namespace Match3.Core.UIElements
 {
     public class Button : UIElement
     {
         public string Text = "Button";
-        private ImageElement _imageBound;
         private ImageElement _imageInside;
         private TextElement _text;
 
@@ -18,17 +16,15 @@ namespace Match3.Core.UIElements
 
         protected override void Init()
         {
-            IsRenderTarget = true;
-
-            Rectangle imageBoundRect = new Rectangle(Rectangle.X / 2, Rectangle.Y / 2, Rectangle.Width, Rectangle.Height);
-            _imageBound = AddImage(Rectangle, DefaultTexture);
-            _imageBound.Image.Color = Color.Black;
-
-            Rectangle imageInsideRect = new Rectangle(Rectangle.X / 2, Rectangle.Y / 2, Rectangle.Width, Rectangle.Height);
             _imageInside = AddImage(Rectangle, DefaultTexture);
-            _imageInside.Image.SetScale(Vector2.One / 1.2f);
 
             _text = AddText(Rectangle, DefaultFont, Text);
+            _text.Text.Color = Color.Black;
+        }
+
+        protected override void OnDraw(SpriteBatch spriteBatch, RenderBuffer<UIElement> renderBuffer)
+        {
+            renderBuffer.Register(_imageInside.Image.Rectangle, this);
         }
 
         protected override void OnMouseEnterAction()
@@ -39,6 +35,18 @@ namespace Match3.Core.UIElements
         protected override void OnMouseExitAction()
         {
             _imageInside.Image.Color = Color.White;
+        }
+
+        protected override void OnClickAction()
+        {
+            _imageInside.Image.Color = Color.DarkGray;
+            _text.Text.Color = Color.Gray;
+        }
+
+        protected override void OnClickUpAction()
+        {
+            _imageInside.Image.Color = Color.White;
+            _text.Text.Color = Color.Black;
         }
     }
 }

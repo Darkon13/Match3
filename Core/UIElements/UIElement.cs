@@ -17,7 +17,7 @@ namespace Match3.Core.UIElements
 
         public bool IsActive = true;
         public float Layer { get; protected set; } = 0;
-        public Rectangle Rectangle { get; private set; }
+        public Rectangle Rectangle { get; set; }
         public Texture2D DefaultTexture { get; private set; }
         public SpriteFont DefaultFont { get; private set; }
 
@@ -178,20 +178,20 @@ namespace Match3.Core.UIElements
 
         private void OnParentSizeChanged(int width, int height)
         {
-            Rectangle rectangle = Rectangle.Empty;
+            //Rectangle rectangle = Rectangle.Empty;
 
-            float newX = Rectangle.X / _parentWidth * width;
-            float newY = Rectangle.Y / _parentHeight * height;
-            float newWidth = Rectangle.Width / _parentWidth * width;
-            float newHeight = Rectangle.Height / _parentHeight * height;
+            //float newX = Rectangle.X / _parentWidth * width;
+            //float newY = Rectangle.Y / _parentHeight * height;
+            //float newWidth = Rectangle.Width / _parentWidth * width;
+            //float newHeight = Rectangle.Height / _parentHeight * height;
 
-            _parentHeight = height;
-            _parentWidth = width;
+            //_parentHeight = height;
+            //_parentWidth = width;
 
-            rectangle = Rectangle.RectangleFromFloat(newX, newY, newWidth, newHeight);
-            Rectangle = rectangle;
+            //rectangle = Rectangle.RectangleFromFloat(newX, newY, newWidth, newHeight);
+            //Rectangle = rectangle;
 
-            SizeChanged?.Invoke(Rectangle.Width, Rectangle.Height);
+            //SizeChanged?.Invoke(Rectangle.Width, Rectangle.Height);
         }
     }
 }

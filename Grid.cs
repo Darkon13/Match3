@@ -561,8 +561,8 @@ namespace Match3
 
                     if (cell.TryGetComponent(out SpriteRenderer spriteRenderer))
                     {
-                        float posX = Transform.Position.X + (i * cellSize) + (i * distanceBetweenX) - (Width * _pivot.X) + (spriteRenderer.Pivot.X * cellSize);
-                        float posY = Transform.Position.Y + (j * cellSize) + (j * distanceBetweenY) - (Height * _pivot.Y) + (spriteRenderer.Pivot.Y * cellSize);
+                        float posX = Transform.Position.X + (i * cellSize) + (i * distanceBetweenX) - (Width * _pivot.X) + (spriteRenderer.Pivot.X * spriteRenderer.Image.Width);
+                        float posY = Transform.Position.Y + (j * cellSize) + (j * distanceBetweenY) - (Height * _pivot.Y) + (spriteRenderer.Pivot.Y * spriteRenderer.Image.Height);
 
                         cell.Transform.Position = new Vector2(posX, posY);
                         cell.Transform.SetScale((float)cellSize / spriteRenderer.PixelPerUnit, (float)cellSize / spriteRenderer.PixelPerUnit);

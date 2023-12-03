@@ -50,6 +50,8 @@ namespace Match3
 
             //Rectangle buttonRect = new Rectangle(Window.ClientBounds.Width / 2, Window.ClientBounds.Height / 2, 200, 200);
             //Button button = _canvas.AddElement<Button>(buttonRect);
+            //button.ClickedUp += Exit;
+            //button.Disable();
 
             ObjectPool<Gem> objectPool = _gameController.CreateObject<ObjectPool<Gem>>();
             objectPool.Init(64);
@@ -60,9 +62,13 @@ namespace Match3
 
             Grid grid = _gameController.CreateObject<Grid>();
             grid.Init(8, 8, gemFactory, objectPool, 48);
+            //grid.Disable();
 
             GridSelector gridSelector = _gameController.CreateObject<GridSelector>();
             gridSelector.Init(grid);
+            //gridSelector.Disable();
+            //objectPool.Disable();
+
         }
 
         protected override void Update(GameTime gameTime)
