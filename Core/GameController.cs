@@ -1,4 +1,6 @@
-﻿using Match3.Core.Utils;
+﻿using Match3.Core.Components;
+using Match3.Core.UIElements;
+using Match3.Core.Utils;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
@@ -8,23 +10,34 @@ namespace Match3.Core
 {
     public class GameController
     {
+        private const string DefaultTextureName = "square";
+        private const string DefaultFontName = "font";
+
         private Game1 _game;
         private SpriteBatch _spriteBatch;
         private List<GameObject> _gameObjects;
         private RenderBuffer<GameObject> _gameObjectRenderBuffer;
+        private RenderBuffer<UIElement> _uiRenderBuffer;
 
         public Texture2D DefaultTexture { get; private set; }
+        public SpriteFont DefaultFont { get; private set; }
 
-        public GameController(Game1 game, SpriteBatch spriteBatch, RenderBuffer<GameObject> renderBuffer)
+        public GameController(Game1 game, SpriteBatch spriteBatch, RenderBuffer<GameObject> gameObjectRenderBuffer, RenderBuffer<UIElement> uiRenderBuffer)
         {
             _game = game;
             _spriteBatch = spriteBatch;
-            _gameObjectRenderBuffer = renderBuffer;
+            _gameObjectRenderBuffer = gameObjectRenderBuffer;
+            _uiRenderBuffer = uiRenderBuffer;
             _gameObjects = new List<GameObject>();
 
-            if (TryGetContent("heart", out Texture2D texture2D))
+            if (TryGetContent(DefaultTextureName, out Texture2D texture2D))
             {
                 DefaultTexture = texture2D;
+            }
+
+            if (TryGetContent(DefaultFontName, out SpriteFont font))
+            {
+                DefaultFont = font;
             }
 
             _game.Updated += UpdateObjects;
@@ -69,11 +82,25 @@ namespace Match3.Core
         {
             gameObject = null;
 
-            if(_gameObjectRenderBuffer.TryGetObjects(point, out List<GameObject> objects))
-            {
-                gameObject = objects[0];
+            if(_uiRenderBuffer.TryGetObjects(point, out List<UIElement> uiElement) == false){
+                if(_gameObjectRenderBuffer.TryGetObjects(point, out List<GameObject> objects))
+                {
+                    float layer = 0;
 
-                return true;
+                    foreach(GameObject @object in objects)
+                    {
+                        if(@object.TryGetComponent(out SpriteRenderer spriteRenderer))
+                        {
+                            if(gameObject == null || spriteRenderer.Layer > layer)
+                            {
+                                gameObject = @object;
+                                layer = spriteRenderer.Layer;
+                            }
+                        }
+                    }
+
+                    return true;
+                }
             }
 
             return false;

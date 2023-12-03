@@ -1,10 +1,4 @@
 ﻿using Microsoft.Xna.Framework.Graphics;
-using Match3.Core;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Match3.Core.Utils;
 
 namespace Match3.Core.Components

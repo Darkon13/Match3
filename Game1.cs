@@ -6,7 +6,6 @@ using Match3.Core.Utils.Input;
 using Match3.GameObjects;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
 using System;
 
 namespace Match3
@@ -21,6 +20,7 @@ namespace Match3
         private GameController _gameController;
         private RenderBuffer<GameObject> _gameObjectRenderBuffer;
         private RenderBuffer<UIElement> _uiElementsRenderBuffer;
+        private Canvas _canvas;
 
         public event Action<TimeSpan> Updated;
         public event Action Drawed;
@@ -44,7 +44,12 @@ namespace Match3
             _uiElementsRenderBuffer = new RenderBuffer<UIElement>();
 
             _spriteBatch = new SpriteBatch(GraphicsDevice);
-            _gameController = new GameController(this, _spriteBatch, _gameObjectRenderBuffer);
+            _gameController = new GameController(this, _spriteBatch, _gameObjectRenderBuffer, _uiElementsRenderBuffer);
+
+            _canvas = new Canvas(_gameController, _uiElementsRenderBuffer);
+
+            //Rectangle buttonRect = new Rectangle(Window.ClientBounds.Width / 2, Window.ClientBounds.Height / 2, 200, 200);
+            //Button button = _canvas.AddElement<Button>(buttonRect);
 
             ObjectPool<Gem> objectPool = _gameController.CreateObject<ObjectPool<Gem>>();
             objectPool.Init(64);
@@ -73,6 +78,7 @@ namespace Match3
             _uiElementsRenderBuffer.Clear();
 
             _spriteBatch.Begin(SpriteSortMode.FrontToBack);
+            _canvas.Draw(_spriteBatch);
             Drawed?.Invoke();
             _spriteBatch.End();
         }

@@ -27,7 +27,7 @@ namespace Match3.GameObjects
 
             if(GameController.TryGetContent(TextureName, out Texture2D texture2D))
             {
-                _spriteRenderer.Texture2D = texture2D;
+                _spriteRenderer.Image.Texture2D = texture2D;
                 _spriteRenderer.IsRenderTarget = true;
             }
 
